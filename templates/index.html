@@ -8,31 +8,27 @@
 </head>
 <body>
 
-<div id="toast" class="toast">Action Successful!</div>
-
 <div class="container">
     <div class="upload-section">
-        <h2><i class="fa-solid fa-cloud-arrow-up"></i> S3 Cloud Manager</h2>
+        <h2><i class="fa-solid fa-cloud"></i> S3 Storage</h2>
         <form action="/upload" method="POST" enctype="multipart/form-data" id="mainUploadForm">
             <input type="file" name="file" id="fileInput" style="display: none;" onchange="handleUpload()">
-            <label for="fileInput" class="upload-btn">
-                <i class="fa-solid fa-plus"></i> Upload New File
-            </label>
+            <label for="fileInput" class="upload-btn">📤 Select & Upload</label>
         </form>
-        <div id="uploadStatus" style="display:none; margin-top:10px; color: var(--primary);">
-            <i class="fas fa-spinner fa-spin"></i> Uploading to AWS...
+        <div id="uploadStatus" style="display:none; margin-top:10px; color: #4361ee;">
+            <i class="fas fa-spinner fa-spin"></i> Uploading...
         </div>
     </div>
 
     <div class="search-container">
-        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="searchInput" placeholder="Search your files..." onkeyup="filterFiles()">
+        <input type="text" id="searchInput" placeholder="🔍 Search files..." onkeyup="filterFiles()">
     </div>
 
     <table>
         <thead>
             <tr>
                 <th>FILE NAME</th>
+                <th>SIZE</th>
                 <th style="text-align: right;">ACTIONS</th>
             </tr>
         </thead>
@@ -41,17 +37,18 @@
             <tr class="file-row">
                 <td class="file-name">
                     <i class="fa-regular 
-                        {% if file.name.endswith('.pdf') %}fa-file-pdf text-danger
-                        {% elif file.name.endswith(('.jpg', '.png', '.jpeg')) %}fa-file-image text-primary
-                        {% elif file.name.endswith(('.mp4', '.mov')) %}fa-file-video text-success
+                        {% if file.name.lower().endswith('.pdf') %}fa-file-pdf
+                        {% elif file.name.lower().endswith(('.jpg', '.png', '.jpeg')) %}fa-file-image
+                        {% elif file.name.lower().endswith(('.mp4', '.mov')) %}fa-file-video
                         {% else %}fa-file-lines{% endif %}
                     "></i>
                     <strong>{{ file.name }}</strong>
                 </td>
+                <td style="color: #888;">{{ file.size }}</td>
                 <td style="text-align: right;">
                     <a href="{{ file.url }}" target="_blank" class="btn-view"><i class="fa-solid fa-eye"></i></a>
                     <form action="{{ url_for('delete_file', filename=file.name) }}" method="POST" style="display:inline;">
-                        <button type="submit" class="btn-delete" onclick="return confirm('Delete this file?')">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Delete?')">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </form>
@@ -63,35 +60,19 @@
 </div>
 
 <script>
-// Search function
 function filterFiles() {
     let input = document.getElementById('searchInput').value.toLowerCase();
     let rows = document.querySelectorAll('.file-row');
     rows.forEach(row => {
-        let fileName = row.querySelector('.file-name').textContent.toLowerCase();
-        row.style.display = fileName.includes(input) ? "" : "none";
+        let name = row.querySelector('.file-name').textContent.toLowerCase();
+        row.style.display = name.includes(input) ? "" : "none";
     });
 }
-
-// Improved Upload Handler
 function handleUpload() {
     const input = document.getElementById('fileInput');
-    const status = document.getElementById('uploadStatus');
-    const label = document.querySelector('.upload-btn');
-
     if (input.files.length > 0) {
-        // 1. Show the spinner
-        status.style.display = "block";
-        
-        // 2. Disable the button so they can't click twice
-        label.style.opacity = "0.5";
-        label.style.pointerEvents = "none";
-        label.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-
-        // 3. Submit after a tiny 100ms delay to ensure the UI updates
-        setTimeout(() => {
-            document.getElementById('mainUploadForm').submit();
-        }, 100);
+        document.getElementById('uploadStatus').style.display = "block";
+        document.getElementById('mainUploadForm').submit();
     }
 }
 </script>
