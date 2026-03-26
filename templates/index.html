@@ -2,102 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud File Manager</title>
-    <style>
-        :root { --primary: #4361ee; --danger: #ef233c; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 40px; }
-        .container { max-width: 850px; margin: auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
-        
-        /* The NEW Upload Section */
-        .upload-section { 
-            background: #f1f4ff; 
-            padding: 40px; 
-            border-radius: 15px; 
-            border: 2px dashed #adc1ff; 
-            margin-bottom: 40px; 
-            text-align: center;
-        }
-
-        /* The Custom Button */
-        .upload-btn {
-            background: var(--primary);
-            color: white;
-            padding: 14px 35px;
-            border-radius: 10px;
-            cursor: pointer;
-            display: inline-block;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
-        }
-        .upload-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4); }
-
-        /* Table Design */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #888; text-transform: uppercase; font-size: 0.8rem; }
-        td { padding: 18px 15px; border-bottom: 1px solid #f1f1f1; }
-        
-        .btn-view { color: var(--primary); text-decoration: none; font-weight: 600; margin-right: 20px; }
-        .btn-delete { background: none; border: none; color: var(--danger); cursor: pointer; font-weight: 600; font-size: 0.9rem; }
-        .btn-delete:hover { text-decoration: underline; }
-    </style>
+    <title>Cloud Manager Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
+<div id="toast" class="toast">Action Successful!</div>
+
 <div class="container">
     <div class="upload-section">
-        <h2 style="margin-top: 0;">☁️ Cloud Storage</h2>
-        <p style="color: #666; margin-bottom: 25px;">Click below to instantly sync a file to your AWS S3 bucket.</p>
-        
+        <h2><i class="fa-solid fa-cloud-arrow-up"></i> S3 Cloud Manager</h2>
         <form action="/upload" method="POST" enctype="multipart/form-data" id="mainUploadForm">
-            <input type="file" name="file" id="fileInput" style="display: none;" onchange="autoSubmit()">
-            
+            <input type="file" name="file" id="fileInput" style="display: none;" onchange="handleUpload()">
             <label for="fileInput" class="upload-btn">
-                📤 Select & Upload File
+                <i class="fa-solid fa-plus"></i> Upload New File
             </label>
         </form>
+        <div id="uploadStatus" style="display:none; margin-top:10px; color: var(--primary);">
+            <i class="fas fa-spinner fa-spin"></i> Uploading to AWS...
+        </div>
     </div>
 
-    <h3>📂 Recent Files</h3>
+    <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search your files..." onkeyup="filterFiles()">
+    </div>
+
     <table>
         <thead>
             <tr>
-                <th>File Name</th>
-                <th style="text-align: right;">Actions</th>
+                <th>FILE NAME</th>
+                <th style="text-align: right;">ACTIONS</th>
             </tr>
         </thead>
-        <tbody>
-            {% if files %}
-                {% for file in files %}
-                <tr>
-                    <td><strong>{{ file.name }}</strong></td>
-                    <td style="text-align: right;">
-                        <a href="{{ file.url }}" target="_blank" class="btn-view">View</a>
-                        <form action="{{ url_for('delete_file', filename=file.name) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this file permanently?');">
-                            <button type="submit" class="btn-delete">Remove</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="2" style="text-align: center; color: #999; padding: 40px;">No files found. Start by uploading one!</td>
-                </tr>
-            {% endif %}
+        <tbody id="fileTable">
+            {% for file in files %}
+            <tr class="file-row">
+                <td class="file-name">
+                    <i class="fa-regular 
+                        {% if file.name.endswith('.pdf') %}fa-file-pdf text-danger
+                        {% elif file.name.endswith(('.jpg', '.png', '.jpeg')) %}fa-file-image text-primary
+                        {% elif file.name.endswith(('.mp4', '.mov')) %}fa-file-video text-success
+                        {% else %}fa-file-lines{% endif %}
+                    "></i>
+                    <strong>{{ file.name }}</strong>
+                </td>
+                <td style="text-align: right;">
+                    <a href="{{ file.url }}" target="_blank" class="btn-view"><i class="fa-solid fa-eye"></i></a>
+                    <form action="{{ url_for('delete_file', filename=file.name) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Delete this file?')">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>
 
 <script>
-    function autoSubmit() {
-        const input = document.getElementById('fileInput');
-        if (input.files.length > 0) {
-            // Optional: You could add a "Loading..." message here
-            document.getElementById('mainUploadForm').submit();
-        }
-    }
-</script>
+// Search function
+function filterFiles() {
+    let input = document.getElementById('searchInput').value.toLowerCase();
+    let rows = document.querySelectorAll('.file-row');
+    rows.forEach(row => {
+        let fileName = row.querySelector('.file-name').textContent.toLowerCase();
+        row.style.display = fileName.includes(input) ? "" : "none";
+    });
+}
 
+// Improved Upload Handler
+function handleUpload() {
+    const input = document.getElementById('fileInput');
+    const status = document.getElementById('uploadStatus');
+    const label = document.querySelector('.upload-btn');
+
+    if (input.files.length > 0) {
+        // 1. Show the spinner
+        status.style.display = "block";
+        
+        // 2. Disable the button so they can't click twice
+        label.style.opacity = "0.5";
+        label.style.pointerEvents = "none";
+        label.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        // 3. Submit after a tiny 100ms delay to ensure the UI updates
+        setTimeout(() => {
+            document.getElementById('mainUploadForm').submit();
+        }, 100);
+    }
+}
+</script>
 </body>
 </html>

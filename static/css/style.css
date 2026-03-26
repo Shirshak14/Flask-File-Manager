@@ -1,0 +1,123 @@
+:root { 
+    --primary: #4361ee; 
+    --danger: #ef233c; 
+    --bg: #f0f2f5; 
+    --text: #2b2d42;
+}
+
+body { 
+    font-family: 'Inter', -apple-system, sans-serif; 
+    background-color: var(--bg); 
+    color: var(--text);
+    margin: 0; 
+    padding: 40px; 
+}
+
+.container { 
+    max-width: 900px; 
+    margin: auto; 
+    background: white; 
+    padding: 40px; 
+    border-radius: 24px; 
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08); 
+}
+
+.search-container {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: 0.3s;
+}
+
+#searchInput:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1); }
+
+.upload-section { 
+    background: linear-gradient(135deg, #f1f4ff 0%, #e8edff 100%);
+    padding: 30px; 
+    border-radius: 18px; 
+    margin-bottom: 30px; 
+    text-align: center;
+}
+
+.upload-btn {
+    background: var(--primary);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-block;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #888; font-size: 0.8rem; letter-spacing: 1px; }
+td { padding: 20px 15px; border-bottom: 1px solid #f8f9fa; }
+
+.file-row:hover { background-color: #fcfcff; }
+.btn-view { color: var(--primary); text-decoration: none; font-weight: 600; margin-right: 15px; }
+.btn-delete { color: var(--danger); background: none; border: none; cursor: pointer; font-weight: 600; }
+/* Search Icon positioning */
+.search-container i {
+    position: absolute;
+    left: 15px;
+    top: 18px;
+    color: #aaa;
+}
+#searchInput { padding-left: 45px; }
+
+/* Icon Colors */
+.fa-file-pdf { color: #e74c3c; margin-right: 10px; }
+.fa-file-image { color: #3498db; margin-right: 10px; }
+.fa-file-video { color: #2ecc71; margin-right: 10px; }
+.fa-file-lines { color: #95a5a6; margin-right: 10px; }
+
+/* Toast Notification Styling */
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.toast.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+@keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+#uploadStatus {
+    font-weight: 600;
+    font-size: 0.9rem;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Make the spinner spin! */
+.fa-spin {
+    margin-right: 8px;
+}
