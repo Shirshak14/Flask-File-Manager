@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud File Manager</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f8f9fa; color: #333; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2, h3 { color: #007bff; }
+        .upload-section { border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
+        input[type="file"] { padding: 10px; border: 1px dashed #ddd; width: 100%; margin-bottom: 10px; border-radius: 5px; }
+        .btn { background-color: #007bff; color: white; border: none; padding: 12px 20px; cursor: pointer; border-radius: 6px; font-weight: bold; width: 100%; }
+        .btn:hover { background-color: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+        th { background-color: #f1f1f1; }
+        .empty-msg { color: #888; font-style: italic; text-align: center; padding: 20px; }
+        .link { color: #28a745; text-decoration: none; font-weight: bold; }
+        .link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="upload-section">
+        <h2>🚀 S3 Cloud Uploader</h2>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <button type="submit" class="btn">Upload to AWS</button>
+        </form>
+    </div>
+
+    <h3>📂 Stored Files</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Access</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if files %}
+                {% for file in files %}
+                <tr>
+                    <td>{{ file.name }}</td>
+                    <td><a href="{{ file.url }}" class="link" target="_blank">View / Download</a></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="2" class="empty-msg">No files found in the bucket.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
