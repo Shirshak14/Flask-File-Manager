@@ -57,6 +57,16 @@ def upload():
         )
     return redirect(url_for('index'))
 
+@app.route('/delete/<filename>', methods=['POST'])
+def delete_file(filename):
+    try:
+        s3.delete_object(Bucket=BUCKET_NAME, Key=filename)
+        print(f"✅ Deleted {filename} from {BUCKET_NAME}")
+    except Exception as e:
+        print(f"❌ Error deleting file: {e}")
+    
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
     print(f"Checking for templates in: {template_dir}")
     print(f"Does index.html exist there? {os.path.exists(os.path.join(template_dir, 'index.html'))}")
