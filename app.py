@@ -106,5 +106,30 @@ def delete_file(filename):
     
     return redirect(url_for('index'))
 
+@app.route('/rename', methods=['POST'])
+def rename_file():
+    old_name = request.form.get('old_name')
+    new_name = request.form.get('new_name')
+    
+    # 1. Basic validation
+    if not old_name or not new_name:
+        return redirect(url_for('index'))
+
+    # 2. Safety: Keep the original file extension if user forgot it
+    ext = os.path.splitext(old_name)[1]
+    if not new_name.lower().endswith(ext.lower()):
+        new_name += ext
+
+    try:
+        # 3. S3 'Rename' is actually: Copy to New Name -> Delete Old Name
+        copy_source = {'Bucket': BUCKET_NAME, 'Key': old_name}
+        s3.copy_object(Bucket=BUCKET_NAME, CopySource=copy_source, Key=new_name)
+        s3.delete_object(Bucket=BUCKET_NAME, Key=old_name)
+        print(f"✅ Successfully renamed {old_name} to {new_name}")
+    except Exception as e:
+        print(f"❌ AWS Rename Error: {e}")
+        
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
     app.run(debug=True)
