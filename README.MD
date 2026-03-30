@@ -1,7 +1,7 @@
 # 🚀 AWS S3 Cloud File Manager
 A Flask-based web application that allows users to upload files directly to an Amazon S3 bucket and view a list of stored files using secure Presigned URLs.
 
-🛠️ Performance Features
+🛠️ Performance Features : 
 Recursive Multi-Upload: Handles bulk file transfers by asynchronously streaming data to S3.
 
 Smart Type-Sensing: Automatically detects file extensions (.pdf, .jpg, .mp4) and assigns high-quality FontAwesome icons.
