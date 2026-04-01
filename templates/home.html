@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>Cloud Storage, <span class="highlight">Reimagined.</span></h1>
+        <p>A high-performance S3 interface built on a modern Cloud-Native architecture. Secure, scalable, and lightning fast.</p>
+        <div class="hero-btns">
+            <a href="/dashboard" class="main-btn">Launch Website <i class="fa-solid fa-rocket"></i></a>
+        </div>
+    </div>
+</div>
+
+<section id="features" class="features-section">
+    <h2 class="section-title">Cloud Architecture</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <i class="fa-solid fa-server"></i>
+            <h3>IaaS (EC2)</h3>
+            <p>Reliable infrastructure providing full control over the compute environment[cite: 25].</p>
+        </div>
+        <div class="feature-card">
+            <i class="fa-solid fa-box-archive"></i>
+            <h3>STaaS (S3)</h3>
+            <p>Durable object storage for all your critical cloud assets[cite: 36, 37].</p>
+        </div>
+        <div class="feature-card">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h3>SECaaS (IAM)</h3>
+            <p>Enterprise-grade security using Role-Based Access Control[cite: 39].</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

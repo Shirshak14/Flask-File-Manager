@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container dashboard-container">
+    <div class="upload-section">
+        <h2><i class="fa-solid fa-folder-open"></i> S3 File Manager</h2>
+        <form action="/upload" method="POST" enctype="multipart/form-data" id="mainUploadForm">
+            <input type="file" name="file" id="fileInput" style="display: none;" onchange="handleUpload()" multiple>
+            <label for="fileInput" class="upload-btn">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Files
+            </label>
+        </form>
+        <div id="uploadStatus" style="display:none; margin-top:15px; color: #4361ee; font-weight: 600;">
+            <i class="fas fa-circle-notch fa-spin"></i> Syncing with AWS...
+        </div>
+    </div>
+
+    <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="Search your cloud files..." onkeyup="filterFiles()">
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>FILE NAME</th>
+                <th>SIZE</th>
+                <th style="text-align: right;">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody id="fileTable">
+            {% for file in files %}
+            <tr class="file-row">
+                <td class="file-name">
+                    <i class="fa-regular fa-file-lines"></i>
+                    <strong>{{ file.name }}</strong>
+                </td>
+                <td class="file-size">{{ file.size }}</td>
+                <td class="actions-cell">
+                    <button onclick="openRename('{{ file.name }}')" class="action-icon rename-btn" title="Rename"><i class="fa-solid fa-pen"></i></button>
+                    <a href="{{ file.url }}" target="_blank" class="action-icon view-btn" title="View"><i class="fa-solid fa-eye"></i></a>
+                    <form action="{{ url_for('delete_file', filename=file.name) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="action-icon delete-btn" onclick="return confirm('Delete?')"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form id="renameForm" action="/rename" method="POST" style="display:none;">
+    <input type="hidden" name="old_name" id="oldNameInput">
+    <input type="hidden" name="new_name" id="newNameInput">
+</form>
+
+<script>
+function filterFiles() {
+    let input = document.getElementById('searchInput').value.toLowerCase();
+    let rows = document.querySelectorAll('.file-row');
+    rows.forEach(row => {
+        let name = row.querySelector('.file-name').textContent.toLowerCase();
+        row.style.display = name.includes(input) ? "" : "none";
+    });
+}
+function handleUpload() {
+    if (document.getElementById('fileInput').files.length > 0) {
+        document.getElementById('uploadStatus').style.display = "block";
+        document.getElementById('mainUploadForm').submit();
+    }
+}
+function openRename(oldName) {
+    let newName = prompt("Enter new name:", oldName);
+    if (newName && newName.trim() !== "" && newName !== oldName) {
+        document.getElementById('oldNameInput').value = oldName;
+        document.getElementById('newNameInput').value = newName.trim();
+        document.getElementById('renameForm').submit();
+    }
+}
+</script>
+{% endblock %}

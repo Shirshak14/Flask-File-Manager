@@ -31,19 +31,23 @@ s3 = boto3.client(
 
 # --- ROUTES ---
 
+# 1. LANDING PAGE (The "Front Door")
 @app.route('/')
-def index():
+def home():
+    return render_template('home.html')
+
+# 2. DASHBOARD (The "Work" Page)
+@app.route('/dashboard')
+def dashboard():
     files = []
     try:
-        # 1. Fetch from S3
+        # Fetch list from S3
         response = s3.list_objects_v2(Bucket=BUCKET_NAME)
         
-        # 2. Check if 'Contents' actually exists in the response
         if 'Contents' in response:
             for obj in response['Contents']:
+                # Dynamic Size Calculation
                 size_bytes = obj['Size']
-                
-                # Conversion logic
                 if size_bytes < 1024:
                     size_str = f"{size_bytes} B"
                 elif size_bytes < 1024**2:
@@ -51,6 +55,7 @@ def index():
                 else:
                     size_str = f"{round(size_bytes/(1024**2), 1)} MB"
 
+                # Generate secure viewing link
                 url = s3.generate_presigned_url(
                     'get_object',
                     Params={'Bucket': BUCKET_NAME, 'Key': obj['Key']},
@@ -62,74 +67,68 @@ def index():
                     'size': size_str,
                     'url': url
                 })
-        else:
-            print("💡 Info: Bucket is currently empty.")
+        return render_template('dashboard.html', files=files)
 
     except Exception as e:
-        # This will print the EXACT AWS error in your terminal
         print(f"❌ AWS Error: {e}")
+        return render_template('dashboard.html', files=[])
 
-    # 3. Always return the template, even if files is empty
-    return render_template('index.html', files=files)
-
+# 3. UPLOAD LOGIC
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return redirect(request.url)
+    files = request.files.getlist('file') # Supports multi-upload
     
-    file = request.files['file']
-    if file.filename == '':
-        return redirect(request.url)
+    if not files or files[0].filename == '':
+        return redirect(url_for('dashboard'))
 
-    if file:
+    for file in files:
         try:
-            # Upload to S3
             s3.upload_fileobj(
                 file,
                 BUCKET_NAME,
                 file.filename,
                 ExtraArgs={"ContentType": file.content_type}
             )
-            print(f"✅ Successfully uploaded {file.filename}")
+            print(f"✅ Uploaded {file.filename}")
         except Exception as e:
             print(f"❌ Upload Error: {e}")
             
-    return redirect(url_for('index'))
+    return redirect(url_for('dashboard'))
 
+# 4. DELETE LOGIC
 @app.route('/delete/<filename>', methods=['POST'])
 def delete_file(filename):
     try:
         s3.delete_object(Bucket=BUCKET_NAME, Key=filename)
-        print(f"🗑️ Deleted {filename} from S3")
+        print(f"🗑️ Deleted {filename}")
     except Exception as e:
         print(f"❌ Delete Error: {e}")
     
-    return redirect(url_for('index'))
+    return redirect(url_for('dashboard'))
 
+# 5. RENAME LOGIC
 @app.route('/rename', methods=['POST'])
 def rename_file():
     old_name = request.form.get('old_name')
     new_name = request.form.get('new_name')
     
-    # 1. Basic validation
     if not old_name or not new_name:
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
-    # 2. Safety: Keep the original file extension if user forgot it
+    # Maintain extension
     ext = os.path.splitext(old_name)[1]
     if not new_name.lower().endswith(ext.lower()):
         new_name += ext
 
     try:
-        # 3. S3 'Rename' is actually: Copy to New Name -> Delete Old Name
         copy_source = {'Bucket': BUCKET_NAME, 'Key': old_name}
         s3.copy_object(Bucket=BUCKET_NAME, CopySource=copy_source, Key=new_name)
         s3.delete_object(Bucket=BUCKET_NAME, Key=old_name)
-        print(f"✅ Successfully renamed {old_name} to {new_name}")
+        print(f"✅ Renamed {old_name} to {new_name}")
     except Exception as e:
-        print(f"❌ AWS Rename Error: {e}")
+        print(f"❌ Rename Error: {e}")
         
-    return redirect(url_for('index'))
+    return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudSync Pro | S3 Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo"><i class="fa-solid fa-cloud"></i> CloudSync</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/dashboard" class="nav-btn">Launch Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <footer class="main-footer">
+        <p>&copy; 2026 CloudSync | Built with AWS S3 & Flask</p>
+    </footer>
+</body>
+</html>
